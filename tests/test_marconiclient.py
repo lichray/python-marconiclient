@@ -16,6 +16,10 @@
 
 import testtools
 from marconiclient import *
+from eventlet import GreenPool
+import uuid
+
+
 
 class TestClientException(testtools.TestCase):
 
@@ -24,24 +28,61 @@ class TestClientException(testtools.TestCase):
         ex = ClientException("Something bad happened")
         self.assertTrue(isinstance(ex, Exception))
 
-   
-    #TODO Use dependency injection to mock HTTP(S)Client 
+
+    #TODO Use dependency injection to mock HTTP(S)Client
     def test_connection(self):
-        """ 
-        conn = Connection(authurl="https://identity.api.rackspacecloud.com/v2.0", 
-                          endpoint="http://166.78.150.92:8888/v1/1",
-                          user="", key="")
+        conn = Connection(auth_url="https://identity.api.rackspacecloud.com/v2.0",
+                          client_id=str(uuid.uuid4()),
+                          # endpoint="http://166.78.150.92:8888/v1/12345",
+                          endpoint="http://166.78.143.130:80/v1/12345",
+                          user="", key="", token='blah')
 
         conn.connect()
 
-        self.assertIsNotNone(conn.endpoint)
-        self.assertIsNotNone(conn.authurl)
+        """
+        def create_worker(queue_name):
+            return conn.create_queuget_queuee(queue_name, 1000)
 
-        queue_name = 'this-is-a-demo-queue8'
+        def delete_worker(queue_name):
+            conn.delete_queue(queue_name)
+            return queue_name
 
-        conn.create_queue(queue_name, 500)
+        pool = GreenPool()
 
-        metadata = conn.get_queue_metadata(queue_name)
+        def on_queue_created(greenthread):
+            queue = greenthread.wait()
+            print queue.name
 
-        self.assertEquals(metadata['messages']['ttl'], 502)
+        queue_names = [str(x) for x in xrange(0,10000)]
+
+        for queue_name in queue_names:
+            gt = pool.spawn(create_worker, queue_name)
+            gt.link(on_queue_created)
+
+        pool.waitall()
+        """
+
+        queue = conn.create_queue('test_queue_whatever', 50)
+
+        """'
+        msg_body = {"username":"buford", "age":32}
+
+        try:
+            msg = queue.post_message(msg_body, 10000)
+        except ClientException as ex:
+            print msg.http_response_content
+
+        print msg.url
+        """
+
+        # msg = msg.read()
+
+        """
+        for queue in pool.imap(create_worker, queue_names):
+            print "Created: ", queue.name
+        """
+
+        """
+        for queue_name in pool.imap(delete_worker, queue_names):
+            print "Deleted: ", queue_name
         """
