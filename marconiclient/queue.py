@@ -9,7 +9,7 @@ class NoSuchQueueError(Exception):
 
 class Queue(object):
 
-    def __init__(self, conn, name, endpoint):
+    def __init__(self, conn, name, endpoint, metadata=None):
         """
         Creates a new queue object. This class should
         never be instantiated directly but should be
@@ -19,6 +19,19 @@ class Queue(object):
         self._conn = conn
         self._endpoint = endpoint
         self._name = name
+        self._metadata = metadata
+
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+
+    @require_authenticated
+    @require_clientid
+    def set_metadata(self, metadata, headers, **kwargs):
+        perform_http(url=self._endpoint, method='PUT', body=metadata, headers=headers)
+        self._metadata = metadata
 
 
     @require_authenticated
@@ -38,6 +51,7 @@ class Queue(object):
         location = replace_endpoint(url, location)
 
         return Message(conn=self._conn, url=location)
+
 
     @property
     def name(self):

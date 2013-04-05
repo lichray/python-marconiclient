@@ -102,12 +102,12 @@ class Connection(object):
         :param ttl: The default time-to-live for messages in this queue
         """
         url = proc_template(self.queue_url, queue_name=queue_name)
-        body = {"messages": {"ttl": ttl}}
+        body = {u'messages': {u'ttl': ttl}}
 
         perform_http(url=url, method='PUT',
                           body=body, headers=headers)
 
-        return Queue(self, endpoint=url, name=queue_name)
+        return Queue(self, endpoint=url, name=queue_name, metadata=body)
 
 
     @require_clientid
@@ -122,14 +122,11 @@ class Connection(object):
         url = proc_template(self.queue_url, queue_name=queue_name)
 
         try:
-            hdrs, body = perform_http(url=url, method='GET')
+            hdrs, body = perform_http(url=url, method='GET', headers=headers)
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
-        print url
-        print body
-
-        return Queue(self, endpoint=url, name=queue_name)
+        return Queue(self, endpoint=url, name=queue_name, metadata=body)
 
 
     @require_clientid
@@ -140,8 +137,6 @@ class Connection(object):
         hdrs, res = perform_http(url=url, method='GET', headers=headers)
         queues = res["queues"]
 
-        #TODO(jdp): Parse out the objects and
-        #remove them.
         for queue in queues:
             yield queue.name
 

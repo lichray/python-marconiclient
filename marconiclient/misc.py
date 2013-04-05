@@ -26,7 +26,7 @@ def http_connect(url):
     return parsed, conn
 
 
-def perform_http(method, url, body='', headers={}):
+def perform_http(method, headers, url, body=''):
     """
     Perform an HTTP operation, checking for appropriate
     errors, etc. and returns the response
