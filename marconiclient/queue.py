@@ -53,6 +53,21 @@ class Queue(object):
         return Message(conn=self._conn, url=location)
 
 
+    @require_authenticated
+    @require_clientid
+    def get_messages(self, headers, **kwargs):
+        """
+        TODO(jdp): Support pagination
+
+        Lists all messages in this queue:w
+        """
+        url = proc_template(self._conn.messages_url, queue_name=self.name)
+
+        hdrs, body = perform_http(url=url, method='GET', headers=headers)
+
+        for message in body['messages']:
+            yield Message(self._conn, url='blah', content=message)
+
     @property
     def name(self):
         """The name of this queue"""

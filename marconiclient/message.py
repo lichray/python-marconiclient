@@ -9,7 +9,7 @@ class NoSuchMessageError(Exception):
 
 class Message(object):
 
-    def __init__(self, conn, url):
+    def __init__(self, conn, url, content=None):
         """
         Creates a message object. This class should never
         be instantiated directly by a user
@@ -18,6 +18,14 @@ class Message(object):
         """
         self._conn = conn
         self._url = url
+
+        self._content = content
+
+    def __getitem__(self, key):
+        if self._content:
+            return self._content[key]
+        else:
+            raise KeyError()
 
     @property
     def url(self):

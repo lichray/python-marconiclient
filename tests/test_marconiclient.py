@@ -73,6 +73,13 @@ class TestClientException(testtools.TestCase):
 
         q1.set_metadata(metadata)
 
+        for x in range(0, 100):
+            print "Posting..."
+            msg = q1.post_message("My Message:"+str(x), 1000)
+
+        for msg in q1.get_messages():
+            print "Body:", msg['body'], msg['ttl']
+
         """
         for queue in conn.list_queues():
             print queue

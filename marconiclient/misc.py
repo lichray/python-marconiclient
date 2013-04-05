@@ -58,7 +58,7 @@ def perform_http(method, headers, url, body=''):
     body = response.read()
 
     if len(body) > 0:
-        body = json.loads(body)
+        body = json.loads(body, encoding='utf-8')
 
     conn.close()
 
