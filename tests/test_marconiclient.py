@@ -34,7 +34,7 @@ class TestClientException(testtools.TestCase):
     def test_connection(self):
         conn = Connection(auth_url="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
-                          endpoint="http://166.78.143.130:80/v1/12345",
+                          endpoint="http://localhost:8888/v1/12345",
                           user="", key="", token='blah')
 
         conn.connect()
@@ -61,14 +61,17 @@ class TestClientException(testtools.TestCase):
 
         pool.waitall()
         """
-        queue = conn.create_queue('test_queue', ttl=100)
+        conn.create_queue('test_queue', ttl=100)
+        queue = conn.get_queue('test_queue')
 
         for x in range(0, 25):
             print "Posting..."
             msg = queue.post_message("XXX:"+str(x), 500)
 
+        for msg in queue.claim_messages(ttl=10, grace=2, limit=3):
+            print msg.url
+            msg.delete()
 
-        msgs = queue.claim_messages(ttl=30, grace=100)
 
         """
         for msg in q1.get_messages():

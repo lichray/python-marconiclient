@@ -72,7 +72,8 @@ class Queue(object):
         hdrs, body = perform_http(url=url, method='POST', body=body, headers=headers)
 
         for msg in body:
-            print msg
+            msgurl = replace_endpoint(url, msg['href'])
+            yield Message(self._conn, url=msgurl, content=msg)
 
 
     @require_authenticated
@@ -95,7 +96,7 @@ class Queue(object):
             for message in body['messages']:
                 yield Message(self._conn, url='blah', content=message)
 
-            links = body['links']
+            links =404, body['links']
             # TODO: Probably a better way to search this
 
             for link in body['links']:
