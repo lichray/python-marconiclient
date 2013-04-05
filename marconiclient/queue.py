@@ -21,6 +21,10 @@ class Queue(object):
         self._name = name
         self._metadata = metadata
 
+        self._messages_template = endpoint + "/messages"
+        self._message_template = endpoint + "/messages/{message_id}"
+        self._claims_template = endpoint + "/claims?limit={limit}"
+        self._claim_template = endpoint + "/claims/{claim_id}"
 
     @property
     def metadata(self):
@@ -52,6 +56,24 @@ class Queue(object):
 
         return Message(conn=self._conn, url=location)
 
+    @require_authenticated
+    @require_clientid
+    def claim_messages(self, headers, ttl, grace, limit=5, **kwargs):
+        """
+        Claims a set of messages. The server configuration determines
+        the maximum number of messages that can be claimed.
+        """
+        url = proc_template(self._claims_template, limit=limit)
+
+        print url
+
+        body = {"ttl":ttl, "grace":grace}
+
+        hdrs, body = perform_http(url=url, method='POST', body=body, headers=headers)
+
+        for msg in body:
+            print msg
+
 
     @require_authenticated
     @require_clientid
@@ -63,10 +85,28 @@ class Queue(object):
         """
         url = proc_template(self._conn.messages_url, queue_name=self.name)
 
-        hdrs, body = perform_http(url=url, method='GET', headers=headers)
+        truncated=True# Was the current request truncated?
 
-        for message in body['messages']:
-            yield Message(self._conn, url='blah', content=message)
+        while truncated:
+            truncated = False
+
+            hdrs, body = perform_http(url=url, method='GET', headers=headers)
+
+            for message in body['messages']:
+                yield Message(self._conn, url='blah', content=message)
+
+            links = body['links']
+            # TODO: Probably a better way to search this
+
+            for link in body['links']:
+                if link['rel'] == 'next':
+                    print "Before:", url
+                    print link['href']
+                    url = replace_endpoint(url, link['href'])
+                    print "After:", url
+                    print "==========="
+                    truncated = True
+                    break
 
     @property
     def name(self):

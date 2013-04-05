@@ -85,6 +85,12 @@ class Connection(object):
         # Specific message endpoint
         self.message_url = self.messages_url + "/{message_id}"
 
+        # Claims endpoint
+        self._claims_url = self.queues_url + "/claims"
+
+        # Specific claim endpoint
+        self._claim_url = self.queues_url + "/claims/{claim_id}"
+
         # Actions endpoint
         self.actions_url = self._endpoint + "/actions"
 

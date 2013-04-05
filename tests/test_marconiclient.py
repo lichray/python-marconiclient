@@ -61,24 +61,19 @@ class TestClientException(testtools.TestCase):
 
         pool.waitall()
         """
-        q1 = conn.create_queue('test_queue', ttl=100)
-        print q1.metadata
+        queue = conn.create_queue('test_queue', ttl=100)
 
-        q2 = conn.get_queue('test_queue')
-        print q2.metadata
-
-        metadata = q2.metadata
-
-        metadata[u'messages'][u'ttl'] = 150
-
-        q1.set_metadata(metadata)
-
-        for x in range(0, 100):
+        for x in range(0, 25):
             print "Posting..."
-            msg = q1.post_message("My Message:"+str(x), 1000)
+            msg = queue.post_message("XXX:"+str(x), 500)
 
+
+        msgs = queue.claim_messages(ttl=30, grace=100)
+
+        """
         for msg in q1.get_messages():
-            print "Body:", msg['body'], msg['ttl']
+            pass # print "Body:", msg['body'], msg['ttl'], msg['id']
+        """
 
         """
         for queue in conn.list_queues():

@@ -73,7 +73,7 @@ def proc_template(template, **kwargs):
     res = template
 
     for name, value in kwargs.iteritems():
-        res = res.replace("{"+name+"}", quote(value))
+        res = res.replace("{"+name+"}", quote(str(value)))
 
     return res
 
@@ -118,4 +118,6 @@ def replace_endpoint(url, endpoint):
     parsed = urlparse(url)
     parts = list(parsed)
     parts[2] = endpoint
+    parts[3] = ""
+    parts[4] = ""
     return urlunparse(parts)
