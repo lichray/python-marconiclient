@@ -4,6 +4,7 @@ import json
 from functools import wraps
 from auth import authenticate
 from misc import http_connect, proc_template, perform_http, require_authenticated
+from misc import require_clientid
 from queue import Queue
 from exceptions import ClientException
 
@@ -62,6 +63,7 @@ class Connection(object):
         self._load_homedoc_hrefs()
 
 
+
     def _load_homedoc_hrefs(self):
         """
         Loads the home document hrefs for each endpoint
@@ -90,6 +92,7 @@ class Connection(object):
         self.action_url = self.actions_url + "/{action_id}"
 
 
+    @require_clientid
     @require_authenticated
     def create_queue(self, queue_name, ttl, headers, **kwargs):
         """
@@ -107,6 +110,7 @@ class Connection(object):
         return Queue(self, endpoint=url, name=queue_name)
 
 
+    @require_clientid
     @require_authenticated
     def get_queue(self, queue_name, headers):
         """
@@ -115,17 +119,34 @@ class Connection(object):
         :param queue_name: The name of the queue
         :param headers: The headers to send to the agent
         """
-
         url = proc_template(self.queue_url, queue_name=queue_name)
 
         try:
-            hdrs, body = perform_http(url, 'GET')
+            hdrs, body = perform_http(url=url, method='GET')
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
+
+        print url
+        print body
 
         return Queue(self, endpoint=url, name=queue_name)
 
 
+    @require_clientid
+    @require_authenticated
+    def list_queues(self, headers):
+        url = self.queues_url
+
+        hdrs, res = perform_http(url=url, method='GET', headers=headers)
+        queues = res["queues"]
+
+        #TODO(jdp): Parse out the objects and
+        #remove them.
+        for queue in queues:
+            yield queue.name
+
+
+    @require_clientid
     @require_authenticated
     def delete_queue(self, queue_name, headers):
         """
@@ -143,6 +164,7 @@ class Connection(object):
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
 
+    @require_clientid
     @require_authenticated
     def get_queue_metadata(self, queue_name, headers, **kwargs):
         url = proc_template(self._queue_url, queue_name=queue_name)

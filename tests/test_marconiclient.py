@@ -25,6 +25,7 @@ class TestClientException(testtools.TestCase):
 
     def test_exception(self):
         # Basic instantiation and inheritance check
+
         ex = ClientException("Something bad happened")
         self.assertTrue(isinstance(ex, Exception))
 
@@ -61,18 +62,21 @@ class TestClientException(testtools.TestCase):
 
         pool.waitall()
         """
+        q1 = conn.create_queue('test_queue', ttl=100)
+        q2 = conn.get_queue('test_queue')
 
+        print "Queue2", q2.name
+
+        """
+        for queue in conn.list_queues():
+            print queue
+        """
+        """
         queue = conn.create_queue('test_queue_whatever', 50)
-
-        """'
         msg_body = {"username":"buford", "age":32}
+        msg = queue.post_message(msg_body, 10000)
 
-        try:
-            msg = queue.post_message(msg_body, 10000)
-        except ClientException as ex:
-            print msg.http_response_content
-
-        print msg.url
+        msg.delete()
         """
 
         # msg = msg.read()

@@ -34,8 +34,9 @@ class Message(object):
         hdrs, body = perform_http(url=self._url, method='GET', headers=headers)
         return body
 
+    @require_authenticated
+    @require_clientid
     def delete(self, headers, **kwargs):
-        try:
-            hdrs, body = perform_http(url=self._url, method='DELETE', headers=headers)
-        except ClientException as ex:
-            raise NoSuchMessageError(queue_name) if ex.http_status == 404 else ex
+        # Note: marconi currently treats messages as idempotent, so
+        # we should never receive a 404 back
+        perform_http(url=self._url, method='DELETE', headers=headers)
