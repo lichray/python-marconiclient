@@ -119,7 +119,7 @@ class Connection(object):
         url = proc_template(self.queue_url, queue_name=queue_name)
 
         try:
-            hdrs, body = perform_http(url, 'GET')
+            hdrs, body = perform_http('GET', url)
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
