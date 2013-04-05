@@ -18,8 +18,8 @@ class Message(object):
         """
         self._conn = conn
         self._url = url
-
         self._content = content
+
 
     def __getitem__(self, key):
         if self._content:
@@ -27,13 +27,11 @@ class Message(object):
         else:
             raise KeyError()
 
+
     @property
     def url(self):
         return self._url
 
-    @property
-    def body(self):
-        return ''
 
     @require_authenticated
     @require_clientid
@@ -41,6 +39,7 @@ class Message(object):
         """ Gets this message and returns the content, includinig all metadata """
         hdrs, body = perform_http(url=self._url, method='GET', headers=headers)
         return body
+
 
     @require_authenticated
     @require_clientid

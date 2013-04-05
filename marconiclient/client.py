@@ -111,7 +111,7 @@ class Connection(object):
         body = {u'messages': {u'ttl': ttl}}
 
         perform_http(url=url, method='PUT',
-                          body=body, headers=headers)
+                          request_body=body, headers=headers)
 
         return Queue(self, endpoint=url, name=queue_name, metadata=body)
 

@@ -15,6 +15,7 @@ def http_connect(url):
 
     parsed = urlparse(url)
 
+
     if parsed.scheme == 'http':
         conn = HTTPConnection(parsed.netloc)
     elif parsed.scheme == 'https':
@@ -26,7 +27,7 @@ def http_connect(url):
     return parsed, conn
 
 
-def perform_http(method, headers, url, body=''):
+def perform_http(method, headers, url, request_body=''):
     """
     Perform an HTTP operation, checking for appropriate
     errors, etc. and returns the response
@@ -40,10 +41,15 @@ def perform_http(method, headers, url, body=''):
     parsed, conn = http_connect(url)
 
     # If the user passed in a dict, list, etc. serialize to JSON
-    if not isinstance(body, str):
-        body = json.dumps(body)
+    if not isinstance(request_body, str):
+        request_body = json.dumps(request_body)
 
-    conn.request(method, parsed.path, body, headers=headers)
+    query_url = parsed.path
+
+    if parsed.query:
+        query_url += "?" + parsed.query
+
+    conn.request(method, query_url, request_body, headers=headers)
 
     response = conn.getresponse()
 
@@ -55,14 +61,14 @@ def perform_http(method, headers, url, body=''):
                               http_response_content=response.read())
 
     headers = response.getheaders()
-    body = response.read()
+    response_body = response.read()
 
-    if len(body) > 0:
-        body = json.loads(body, encoding='utf-8')
+    if len(response_body) > 0:
+        response_body = json.loads(response_body, encoding='utf-8')
 
     conn.close()
 
-    return dict(headers), body
+    return dict(headers), response_body
 
 
 def proc_template(template, **kwargs):

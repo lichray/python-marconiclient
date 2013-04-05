@@ -34,7 +34,7 @@ class Queue(object):
     @require_authenticated
     @require_clientid
     def set_metadata(self, metadata, headers, **kwargs):
-        perform_http(url=self._endpoint, method='PUT', body=metadata, headers=headers)
+        perform_http(url=self._endpoint, method='PUT', request_body=metadata, headers=headers)
         self._metadata = metadata
 
 
@@ -49,12 +49,13 @@ class Queue(object):
 
         body = [{"ttl": ttl, "body": message}]
 
-        hdrs, body = perform_http(url=url, method='POST', body=body, headers=headers)
+        hdrs, body = perform_http(url=url, method='POST', request_body=body, headers=headers)
 
         location = hdrs['location']
         location = replace_endpoint(url, location)
 
         return Message(conn=self._conn, url=location)
+
 
     @require_authenticated
     @require_clientid
@@ -65,11 +66,10 @@ class Queue(object):
         """
         url = proc_template(self._claims_template, limit=limit)
 
-        print url
 
         body = {"ttl":ttl, "grace":grace}
 
-        hdrs, body = perform_http(url=url, method='POST', body=body, headers=headers)
+        hdrs, body = perform_http(url=url, method='POST', request_body=body, headers=headers)
 
         for msg in body:
             msgurl = replace_endpoint(url, msg['href'])
@@ -79,6 +79,7 @@ class Queue(object):
     @require_authenticated
     @require_clientid
     def get_messages(self, headers, **kwargs):
+
         """
         TODO(jdp): Support pagination
 
@@ -93,21 +94,17 @@ class Queue(object):
 
             hdrs, body = perform_http(url=url, method='GET', headers=headers)
 
-            for message in body['messages']:
-                yield Message(self._conn, url='blah', content=message)
-
-            links =404, body['links']
-            # TODO: Probably a better way to search this
+            if not body:
+                # Empty body, just short-circuit and return
+                return
 
             for link in body['links']:
                 if link['rel'] == 'next':
-                    print "Before:", url
-                    print link['href']
                     url = replace_endpoint(url, link['href'])
-                    print "After:", url
-                    print "==========="
                     truncated = True
-                    break
+
+            for message in body['messages']:
+                yield Message(self._conn, url='blah', content=message)
 
     @property
     def name(self):
