@@ -18,6 +18,7 @@ import testtools
 from marconiclient import *
 from eventlet import GreenPool
 import uuid
+from urlparse import urlparse
 
 
 
@@ -32,7 +33,7 @@ class TestClientException(testtools.TestCase):
 
     #TODO Use dependency injection to mock HTTP(S)Client
     def test_connection(self):
-        conn = Connection(auth_url="https://identity.api.rackspacecloud.com/v2.0",
+        conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
                           endpoint="http://localhost:8888/v1/12345",
                           user="", key="", token='blah')
@@ -61,30 +62,36 @@ class TestClientException(testtools.TestCase):
 
         pool.waitall()
         """
-        # queue = conn.create_queue('test_queue', ttl=100)
+
+        queue = conn.create_queue('test_queue', ttl=1000)
         queue = conn.get_queue('test_queue')
+        queue = conn.create_queue('test_queue2', ttl=1000)
+        queue = conn.create_queue('test_queue3', ttl=1000)
 
         print "Creating messages"
 
-        for x in range(0, 100):
-            msg = queue.post_message("XXX:"+str(x), 500000)
-            print msg.url
+        for x in range(0, 10):
+            msg = queue.post_message("yyy:"+str(x), 500000)
 
-        print "done creating messages"
+        print "Done creating messages"
 
-        """
-        for msg in queue.claim_messages(ttl=10, grace=2, limit=3):
-            print msg.url
-            msg.delete()
-        """
+        claim = queue.claim(ttl=10, grace=100, limit=2)
 
-        for msg in queue.get_messages():
+        for msg in claim.messages:
+            print "Claimed:", msg._href
+
+        claim.release()
+
+        print "Listing messages..."
+
+        for msg in queue.get_messages(echo=False):
             print "Body:", msg['body'], msg['ttl'], msg['href']
 
-        """
-        for queue in conn.list_queues():
-            print queue
-        """
+        print "Done listing messages"
+
+        for queue in conn.get_queues():
+            print queue.name
+
         """
         queue = conn.create_queue('test_queue_whatever', 50)
         msg_body = {"username":"buford", "age":32}

@@ -7,3 +7,4 @@ from exceptions import *
 from auth import *
 from queue import *
 from message import *
+from claim import *

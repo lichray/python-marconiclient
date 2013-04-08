@@ -1,38 +1,42 @@
 
+from misc import require_authenticated, require_clientid
+
+
 class Claim(object):
 
-    def __init__(self, conn, url, messages):
+    def __init__(self, conn, href, messages):
         """
         :param: conn The conn to use for manipulating this claim
-        :param: url The fully-qualified URL for this claim
+        :param: href The fully-qualified URL for this claim
         :param: messages A list of messages belonging to this claim
         """
         self._conn = conn
-        self._url = url
+        self._href = href
         self._msgs = messages
 
-
+    @property
     def messages(self):
         """
-        Returns the messages associated with this claim
+        Returns the messages that were associated with
+        this claim at creation time.
         """
         return self._msgs
 
+    @require_authenticated
+    @require_clientid
+    def update(self, ttl, headers):
+        """
+        Updates this claim with the specified TTL
+        """
+        body = {"ttl": ttl}
+        self._conn._perform_http(
+            href=self._href, method='PATCH', body=body, headers=headers)
 
     @require_authenticated
     @require_clientid
-    def update(self, ttl, headers, **kwargs)
-        """
-        Updates this claim with the specified ttl
-        """
-        body = {"ttl":ttl}
-        perform_http(url=self._url, method='PATCH', body=body, headers=headers)
-
-
-    @require_authenticated
-    @require_clientid
-    def release(self, headers, **kwargs):
+    def release(self, headers):
         """
         Releases the current claim
         """
-        perform_http(self._url, method='DELETE', headers=headers)
+        self._conn._perform_http(
+            href=self._href, method='DELETE', headers=headers)

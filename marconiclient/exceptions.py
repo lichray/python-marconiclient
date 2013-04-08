@@ -1,4 +1,5 @@
 
+
 class ClientException(Exception):
     """Exception for wrapping up Marconi client errors"""
     def __init__(self, url='', http_status=0,
@@ -11,4 +12,3 @@ class ClientException(Exception):
 
         msg = "%s %s returned %d" % (self.method, self.url, self.http_status)
         Exception.__init__(self, msg)
-
