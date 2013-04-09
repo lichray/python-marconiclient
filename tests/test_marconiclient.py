@@ -33,24 +33,34 @@ class TestClientException(testtools.TestCase):
 
     #TODO Use dependency injection to mock HTTP(S)Client
     def test_connection(self):
+
+        """
+        conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
+                          client_id=str(uuid.uuid4()),
+                          endpoint="http://localhost:8888/v1/12345",
+                          user="", key="", token='blah')
+
+        """
+
         conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
                           endpoint="http://166.78.143.130/v1/12345",
                           user="", key="", token='blah')
 
+
         conn.connect()
 
         def create_worker(queue_name):
-            return conn.create_queue(queue_name, 1000)
+            return conn.create_queue(queue_name, 100)
 
         def post_worker(queue):
-            return queue.post_message('test_message', 100)
+            return queue.post_message('test_message', 10)
 
         def delete_worker(queue_name):
             conn.delete_queue(queue_name)
             return queue_name
 
-        pool = GreenPool(500)
+        pool = GreenPool(300)
 
         def on_message_posted(greenthread):
             msg = greenthread.wait()
@@ -58,18 +68,29 @@ class TestClientException(testtools.TestCase):
 
         def on_queue_created(greenthread):
             queue = greenthread.wait()
+            print queue.name
 
-            for x in range(0, 10):
+            for x in range(0, 1000):
                 gt = pool.spawn(post_worker, queue)
                 gt.link(on_message_posted)
 
-        queue_names = ["queue-"+str(x) for x in xrange(0,10)]
+        queue_names = ["queue-"+str(x) for x in xrange(0,50000)]
 
         for queue_name in queue_names:
             gt = pool.spawn(create_worker, queue_name)
             gt.link(on_queue_created)
 
         pool.waitall()
+
+        """
+
+        # Now delete the queue
+        print "Deleting..."
+        for queue_name in queue_names:
+            gt = pool.spawn_n(delete_worker, queue_name)
+
+        pool.waitall()
+        """
 
         """"
         queue = conn.create_queue('test_queue', ttl=1000)

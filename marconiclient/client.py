@@ -1,3 +1,8 @@
+
+from eventlet.green.urllib import quote
+import eventlet
+requests = eventlet.import_patched('requests')
+
 import json
 from functools import wraps
 from auth import authenticate
@@ -5,11 +10,10 @@ from misc import proc_template, require_authenticated
 from misc import require_clientid
 from queue import Queue
 from exceptions import ClientException
-from urlparse import urlparse
+from urlparse import urljoin
 
-from eventlet.green.urllib import quote
-from eventlet.green.httplib import HTTPConnection, HTTPSConnection
 
+# from eventlet.green.httplib import HTTPConnection, HTTPSConnection
 
 class Connection(object):
     def __init__(self, client_id, auth_endpoint, user, key, **kwargs):
@@ -49,19 +53,17 @@ class Connection(object):
         """The fully-qualified URI of the endpoint"""
         return self._endpoint
 
-    def _http_connect():
-        return self._conn._http_connect(href=self._endpoint)
-
     def connect(self, **kwargs):
         """
         Authenticates the client and returns the endpoint
         """
+        self._session = requests.Session(verify=True)
+
         if not self._token:
             (self._endpoint, self._token) = authenticate(self._auth_endpoint,
                                                          self._user, self._key,
                                                          endpoint=self._endpoint,
                                                          cacert=self._cacert)
-
         self._load_homedoc_hrefs()
 
     def _load_homedoc_hrefs(self):
@@ -169,24 +171,6 @@ class Connection(object):
         href = proc_template(self._queue_href, queue_name=queue_name)
         return self._perform_http(conn, href, 'GET', headers=headers)
 
-    def _http_connect(self):
-        """Creates an HTTP/HTTPSConnection object, as appropriate and
-        returns a tuple containing the parsed URL and connection
-
-        :param href: The href that's going to be used with this connection"""
-
-        parsed = urlparse(self._endpoint)
-
-        if parsed.scheme == 'http':
-            conn = HTTPConnection(parsed.netloc)
-        elif parsed.scheme == 'https':
-            conn = HTTPSConnection(parsed.netloc)
-        else:
-            raise ClientException('Cannot handle protocol %s for href %s' %
-                                  (parsed.scheme, repr(href)))
-
-        return conn
-
     def _perform_http(self, method, headers, href, request_body=''):
         """
         Perform an HTTP operation, checking for appropriate
@@ -198,29 +182,21 @@ class Connection(object):
         :param headers: Any additional headers to submit
         :return: (headers, body)
         """
-        conn = self._http_connect()
-
-        # If the user passed in a dict, list, etc. serialize to JSON
         if not isinstance(request_body, str):
             request_body = json.dumps(request_body)
 
-        conn.request(method, href, request_body, headers=headers)
+        url = urljoin(self._endpoint, href)
 
-        response = conn.getresponse()
+        response = self._session.request(method=method, url=url,
+                                         data=request_body, headers=headers)
 
         # Check if the status code is 2xx class
-        if response.status // 100 != 2:
+        if not response.ok:
             raise ClientException(href=href,
                                   method=method,
-                                  http_status=response.status,
-                                  http_response_content=response.read())
+                                  http_status=response.status_code,
+                                  http_response_content=response.content)
 
-        headers = response.getheaders()
-        response_body = response.read()
+        content_length = int(response.headers.get('Content-Length',0))
 
-        if len(response_body) > 0:
-            response_body = json.loads(response_body, encoding='utf-8')
-
-        conn.close()
-
-        return dict(headers), response_body
+        return response.headers, response.json if content_length else ''
