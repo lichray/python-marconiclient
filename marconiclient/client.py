@@ -139,13 +139,13 @@ class Connection(object):
     def get_queues(self, headers):
         href = self.queues_href
 
-        hdrs, res = self._perform_http(href=href, method='GET', headers=headers)
+        hdrs, res = self._perform_http(
+            href=href, method='GET', headers=headers)
         queues = res["queues"]
 
         for queue in queues:
             yield Queue(conn=self._conn, name=queue['name'],
                         href=queue['href'], metadata=queue['metadata'])
-
 
     @require_clientid
     @require_authenticated
@@ -163,7 +163,6 @@ class Connection(object):
             self._perform_http(href=href, method='DELETE', headers=headers)
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
-
 
     @require_clientid
     @require_authenticated
