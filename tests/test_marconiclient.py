@@ -35,38 +35,48 @@ class TestClientException(testtools.TestCase):
     def test_connection(self):
         conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
-                          endpoint="http://localhost:8888/v1/12345",
+                          endpoint="http://166.78.143.130/v1/12345",
                           user="", key="", token='blah')
 
         conn.connect()
 
-        """
         def create_worker(queue_name):
-            return conn.create_queuget_queuee(queue_name, 1000)
+            return conn.create_queue(queue_name, 1000)
+
+        def post_worker(queue):
+            return queue.post_message('test_message', 100)
 
         def delete_worker(queue_name):
             conn.delete_queue(queue_name)
             return queue_name
 
-        pool = GreenPool()
+        pool = GreenPool(500)
+
+        def on_message_posted(greenthread):
+            msg = greenthread.wait()
+            print msg._href
 
         def on_queue_created(greenthread):
             queue = greenthread.wait()
-            print queue.name
 
-        queue_names = [str(x) for x in xrange(0,10000)]
+            for x in range(0, 10):
+                gt = pool.spawn(post_worker, queue)
+                gt.link(on_message_posted)
+
+        queue_names = ["queue-"+str(x) for x in xrange(0,10)]
 
         for queue_name in queue_names:
             gt = pool.spawn(create_worker, queue_name)
             gt.link(on_queue_created)
 
         pool.waitall()
-        """
 
+        """"
         queue = conn.create_queue('test_queue', ttl=1000)
         queue = conn.get_queue('test_queue')
         queue = conn.create_queue('test_queue2', ttl=1000)
         queue = conn.create_queue('test_queue3', ttl=1000)
+
 
         metadata = queue.metadata
         metadata["messages"]["ttl"] = 321
@@ -96,6 +106,7 @@ class TestClientException(testtools.TestCase):
 
         for queue in conn.get_queues():
             print queue.name
+            """
 
         """
         queue = conn.create_queue('test_queue_whatever', 50)

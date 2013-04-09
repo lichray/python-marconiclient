@@ -85,11 +85,7 @@ class Queue(object):
     @require_authenticated
     @require_clientid
     def get_messages(self, headers, echo=False):
-
         """
-        TODO(jdp): Support pagination
-
-        Lists all messages in this queue:w
         """
         href = proc_template(self._conn.messages_href, queue_name=self.name)
 

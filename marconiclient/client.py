@@ -1,5 +1,3 @@
-from urllib import quote
-
 import json
 from functools import wraps
 from auth import authenticate
@@ -9,6 +7,7 @@ from queue import Queue
 from exceptions import ClientException
 from urlparse import urlparse
 
+from eventlet.green.urllib import quote
 from eventlet.green.httplib import HTTPConnection, HTTPSConnection
 
 
