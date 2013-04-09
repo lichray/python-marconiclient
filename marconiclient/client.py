@@ -146,6 +146,7 @@ class Connection(object):
             yield Queue(conn=self._conn, name=queue['name'],
                         href=queue['href'], metadata=queue['metadata'])
 
+
     @require_clientid
     @require_authenticated
     def delete_queue(self, queue_name, headers):
@@ -162,6 +163,7 @@ class Connection(object):
             self._perform_http(href=href, method='DELETE', headers=headers)
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
+
 
     @require_clientid
     @require_authenticated

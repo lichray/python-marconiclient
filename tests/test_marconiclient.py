@@ -68,6 +68,11 @@ class TestClientException(testtools.TestCase):
         queue = conn.create_queue('test_queue2', ttl=1000)
         queue = conn.create_queue('test_queue3', ttl=1000)
 
+        metadata = queue.metadata
+        metadata["messages"]["ttl"] = 321
+
+        queue.update_metadata(metadata)
+
         print "Creating messages"
 
         for x in range(0, 10):

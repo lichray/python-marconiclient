@@ -35,7 +35,7 @@ class Queue(object):
 
     @require_authenticated
     @require_clientid
-    def set_metadata(self, metadata, headers, **kwargs):
+    def update_metadata(self, metadata, headers):
         self._conn._perform_http(
             href=self._href, method='PUT', request_body=metadata, headers=headers)
 
