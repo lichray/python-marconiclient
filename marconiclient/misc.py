@@ -1,12 +1,5 @@
 
-
-from urlparse import urlparse, urlunparse
 from urllib import quote
-from eventlet.green.httplib import HTTPConnection, HTTPSConnection
-import json
-from exceptions import ClientException
-from functools import wraps
-
 
 def proc_template(template, **kwargs):
     """

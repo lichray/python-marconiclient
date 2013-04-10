@@ -1,7 +1,7 @@
 
 from eventlet.green.urllib import quote
 import eventlet
-requests = eventlet.import_patched('requests')
+eventlet.monkey_patch(socket=True, select=True)
 
 import json
 from functools import wraps
@@ -10,8 +10,7 @@ from misc import proc_template
 from queue import Queue
 from exceptions import ClientException
 from urlparse import urljoin
-
-# from eventlet.green.httplib import HTTPConnection, HTTPSConnection
+import requests
 
 class Connection(object):
     def __init__(self, client_id, auth_endpoint, user, key, **kwargs):
