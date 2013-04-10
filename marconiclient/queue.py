@@ -2,6 +2,7 @@ from misc import proc_template, require_authenticated
 
 from message import Message
 from claim import Claim
+from stats import Stats
 
 
 class NoSuchQueueError(Exception):
@@ -106,6 +107,17 @@ class Queue(object):
 
             for message in body['messages']:
                 yield Message(self._conn, href='blah', content=message)
+
+    @require_authenticated
+    def get_stats(self, headers):
+        """Retrieves statistics about the queue"""
+        href = proc_template(self._conn.stats_href, queue_name=self._name)
+
+        hdrs, body = self._conn._perform_http(href=href,
+                                              method='GET',
+                                              headers=headers)
+
+        return Stats(body)
 
     @property
     def name(self):
