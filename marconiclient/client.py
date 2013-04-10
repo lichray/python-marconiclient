@@ -199,6 +199,6 @@ class Connection(object):
                                   http_status=response.status_code,
                                   http_response_content=response.content)
 
-        content_length = int(response.headers.get('Content-Length',0))
+        resp_body = json.loads(response.content) if response.content else ''
 
-        return response.headers, response.json() if content_length else ''
+        return response.headers, resp_body
