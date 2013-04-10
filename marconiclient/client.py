@@ -159,13 +159,7 @@ class Connection(object):
         :param queue_name: The name of the queue
         """
         href = proc_template(self.queue_href, queue_name=queue_name)
-
-        try:
-            href = proc_template(self.queue_href, queue_name=queue_name)
-            self._perform_http(href=href, method='DELETE')
-
-        except ClientException as ex:
-            raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
+        self._perform_http(href=href, method='DELETE')
 
 
     def get_queue_metadata(self, queue_name):
