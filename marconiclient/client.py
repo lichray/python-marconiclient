@@ -201,4 +201,4 @@ class Connection(object):
 
         content_length = int(response.headers.get('Content-Length',0))
 
-        return response.headers, response.json if content_length else ''
+        return response.headers, response.json() if content_length else ''
