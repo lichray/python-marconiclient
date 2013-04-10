@@ -11,7 +11,6 @@ from queue import Queue
 from exceptions import ClientException
 from urlparse import urljoin
 
-
 # from eventlet.green.httplib import HTTPConnection, HTTPSConnection
 
 class Connection(object):
@@ -98,6 +97,9 @@ class Connection(object):
 
         # Specific action endpoint
         self.action_href = self.actions_href + "/{action_id}"
+
+        # Statistics endpoint
+        self.stats_href = self.queue_href + "/stats"
 
     @require_authenticated
     def create_queue(self, queue_name, ttl, headers, **kwargs):
