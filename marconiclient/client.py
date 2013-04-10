@@ -6,7 +6,7 @@ requests = eventlet.import_patched('requests')
 import json
 from functools import wraps
 from auth import authenticate
-from misc import proc_template, require_authenticated
+from misc import proc_template
 from queue import Queue
 from exceptions import ClientException
 from urlparse import urljoin
@@ -23,7 +23,6 @@ class Connection(object):
         self._auth_endpoint = auth_endpoint
         self._user = user
         self._key = key
-        self._token = kwargs.get('token')
         self._endpoint = kwargs.get('endpoint')
         self._cacert = kwargs.get('cacert')
         self._client_id = client_id
@@ -37,11 +36,6 @@ class Connection(object):
         return self
 
     @property
-    def token(self):
-        """The auth token to use"""
-        return self._token
-
-    @property
     def auth_endpoint(self):
         """The fully-qualified URI of the auth endpoint"""
         return self._auth_endpoint
@@ -51,19 +45,38 @@ class Connection(object):
         """The fully-qualified URI of the endpoint"""
         return self._endpoint
 
-    def connect(self, **kwargs):
+    def connect(self, token=None):
         """
-        Authenticates the client and returns the endpoint
+        Establishes a connection. If token is not None the
+        token will be used for this connection and auth will
+        not happen.
         """
         headers = {"Client-Id": self._client_id}
         self._session = requests.Session(verify=True, headers=headers)
 
-        if not self._token:
-            (self._endpoint, self._token) = authenticate(self._auth_endpoint,
+        if token:
+            self.auth_token = token
+        else:
+            (self._endpoint, self.auth_token) = authenticate(self._auth_endpoint,
                                                          self._user, self._key,
                                                          endpoint=self._endpoint,
                                                          cacert=self._cacert)
         self._load_homedoc_hrefs()
+
+    @property
+    def auth_token(self):
+        try:
+            return self._session.headers['X-Auth-Token']
+        except KeyError:
+            return None
+
+    @auth_token.setter
+    def auth_token(self, value):
+        self._token = value
+        self._session.headers['X-Auth-Token'] = value
+
+    def _set_auth_token(token):
+        self._session.headers['X-Auth-Token'] = token
 
     def _load_homedoc_hrefs(self):
         """
@@ -101,8 +114,7 @@ class Connection(object):
         # Statistics endpoint
         self.stats_href = self.queue_href + "/stats"
 
-    @require_authenticated
-    def create_queue(self, queue_name, ttl, headers, **kwargs):
+    def create_queue(self, queue_name, ttl):
         """
         Creates a queue with the specified name
 
@@ -112,63 +124,57 @@ class Connection(object):
         href = proc_template(self.queue_href, queue_name=queue_name)
         body = {u'messages': {u'ttl': ttl}}
 
-        self._perform_http(href=href, method='PUT',
-                           request_body=body, headers=headers)
+        self._perform_http(href=href, method='PUT', request_body=body)
 
         return Queue(self, href=href, name=queue_name, metadata=body)
 
-    @require_authenticated
-    def get_queue(self, queue_name, headers):
+    def get_queue(self, queue_name):
         """
         Gets a queue by name
 
         :param queue_name: The name of the queue
-        :param headers: The headers to send to the agent
         """
         href = proc_template(self.queue_href, queue_name=queue_name)
 
         try:
-            hdrs, body = self._perform_http(
-                href=href, method='GET', headers=headers)
+            hdrs, body = self._perform_http(href=href, method='GET')
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
         return Queue(self, href=href, name=queue_name, metadata=body)
 
-    @require_authenticated
-    def get_queues(self, headers):
+    def get_queues(self):
         href = self.queues_href
 
-        hdrs, res = self._perform_http(
-            href=href, method='GET', headers=headers)
+        hdrs, res = self._perform_http(href=href, method='GET')
         queues = res["queues"]
 
         for queue in queues:
             yield Queue(conn=self._conn, name=queue['name'],
                         href=queue['href'], metadata=queue['metadata'])
 
-    @require_authenticated
-    def delete_queue(self, queue_name, headers):
+    def delete_queue(self, queue_name):
         """
         Deletes a queue
 
         :param queue_name: The name of the queue
-        :param headers: The name
         """
         href = proc_template(self.queue_href, queue_name=queue_name)
 
         try:
             href = proc_template(self.queue_href, queue_name=queue_name)
-            self._perform_http(href=href, method='DELETE', headers=headers)
+            self._perform_http(href=href, method='DELETE')
+
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
-    @require_authenticated
-    def get_queue_metadata(self, queue_name, headers, **kwargs):
-        href = proc_template(self._queue_href, queue_name=queue_name)
-        return self._perform_http(conn, href, 'GET', headers=headers)
 
-    def _perform_http(self, method, headers, href, request_body=''):
+    def get_queue_metadata(self, queue_name):
+        href = proc_template(self._queue_href, queue_name=queue_name)
+        return self._perform_http(conn, href, 'GET')
+
+
+    def _perform_http(self, method, href, request_body='', headers={}):
         """
         Perform an HTTP operation, checking for appropriate
         errors, etc. and returns the response

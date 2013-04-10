@@ -1,4 +1,4 @@
-from misc import proc_template, require_authenticated
+from misc import proc_template
 
 from message import Message
 from claim import Claim
@@ -35,12 +35,11 @@ class Queue(object):
     def metadata(self):
         return self._metadata
 
-    @require_authenticated
-    def update_metadata(self, metadata, headers):
+    def update_metadata(self, metadata):
         self._conn._perform_http(href=self._href,
                                  method='PUT',
-                                 request_body=metadata,
-                                 headers=headers)
+                                 request_body=metadata)
+
 
         self._metadata = metadata
 
@@ -48,8 +47,7 @@ class Queue(object):
     def href(self):
         return self._href
 
-    @require_authenticated
-    def post_message(self, message, ttl, headers, **kwargs):
+    def post_message(self, message, ttl):
         """
         Posts a single message with the specified ttl
         :param ttl: The TTL to set on this message
@@ -59,14 +57,13 @@ class Queue(object):
         body = [{"ttl": ttl, "body": message}]
 
         hdrs, body = self._conn._perform_http(
-            href=href, method='POST', request_body=body, headers=headers)
+            href=href, method='POST', request_body=body)
 
         location = hdrs['location']
 
         return Message(conn=self._conn, href=location)
 
-    @require_authenticated
-    def claim(self, headers, ttl, grace, limit=5):
+    def claim(self, ttl, grace, limit=5):
         """
         Claims a set of messages. The server configuration determines
         the maximum number of messages that can be claimed.
@@ -74,17 +71,19 @@ class Queue(object):
         href = proc_template(self._claims_template, limit=limit)
 
         body = {"ttl": ttl, "grace": grace}
-        hdrs, body = self._conn._perform_http(
-            href=href, method='POST', request_body=body, headers=headers)
 
+        hdrs, body = self._conn._perform_http(
+            href=href, method='POST', request_body=body)
+
+        # Build a list of Message objects using a list comprehesion
         msgs = [Message(self._conn, href=msg[
                         'href'], content=msg) for msg in body]
 
         location = hdrs['location']
+
         return Claim(conn=self._conn, messages=msgs, href=location)
 
-    @require_authenticated
-    def get_messages(self, headers, echo=False, restart=False):
+    def get_messages(self, echo=False, restart=False):
         """
         TODO(jdp): Comment me
         """
@@ -101,7 +100,7 @@ class Queue(object):
             truncated = False
 
             hdrs, body = self._conn._perform_http(
-                href=self._get_messages_href, method='GET', headers=headers)
+                href=self._get_messages_href, method='GET')
 
             if not body:
                 # Empty body, just short-circuit and return
@@ -117,14 +116,11 @@ class Queue(object):
                               href=message['href'],
                               content=message)
 
-    @require_authenticated
-    def get_stats(self, headers):
+    def get_stats(self):
         """Retrieves statistics about the queue"""
         href = proc_template(self._conn.stats_href, queue_name=self._name)
 
-        hdrs, body = self._conn._perform_http(href=href,
-                                              method='GET',
-                                              headers=headers)
+        hdrs, body = self._conn._perform_http(href=href, method='GET')
 
         return Stats(body)
 

@@ -19,20 +19,3 @@ def proc_template(template, **kwargs):
         res = res.replace("{" + name + "}", quote(str(value)))
 
     return res
-
-
-def require_authenticated(f):
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        token = self._conn._token
-
-        if not token:
-            raise ClientException("Authentication Required")
-
-        hdrs = kwargs.get('headers', {})
-        hdrs['X-Auth-Token'] = token
-
-        kwargs['headers'] = hdrs
-
-        return f(self, *args, **kwargs)
-    return wrapper

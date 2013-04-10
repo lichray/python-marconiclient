@@ -38,17 +38,17 @@ class TestClientException(testtools.TestCase):
         conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
                           endpoint="http://localhost:8888/v1/12345",
-                          user="", key="", token='blah')
+                          user="", key="")
 
         """
 
         conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
                           client_id=str(uuid.uuid4()),
                           endpoint="http://166.78.143.130/v1/12345",
-                          user="", key="", token='blah')
+                          user="", key="")
 
 
-        conn.connect()
+        conn.connect(token='blah')
 
         def create_worker(queue_name):
             return conn.create_queue(queue_name, 100)

@@ -1,6 +1,6 @@
 
 
-from misc import proc_template, require_authenticated
+from misc import proc_template
 
 
 class NoSuchMessageError(Exception):
@@ -31,16 +31,13 @@ class Message(object):
     def href(self):
         return self._href
 
-    @require_authenticated
-    def read(self, headers, **kwargs):
+    def read(self):
         """ Gets this message and returns the content, includinig all metadata """
-        hdrs, body = self._conn._perform_http(
-            href=self._href, method='GET', headers=headers)
+        hdrs, body = self._conn._perform_http(href=self._href, method='GET')
+
         return body
 
-    @require_authenticated
-    def delete(self, headers, **kwargs):
+    def delete(self):
         # Note: marconi currently treats messages as idempotent, so
         # we should never receive a 404 back
-        self._conn._perform_http(
-            href=self._href, method='DELETE', headers=headers)
+        self._conn._perform_http(href=self._href, method='DELETE')

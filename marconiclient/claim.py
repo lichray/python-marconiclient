@@ -1,7 +1,4 @@
 
-from misc import require_authenticated
-
-
 class Claim(object):
 
     def __init__(self, conn, href, messages):
@@ -22,19 +19,15 @@ class Claim(object):
         """
         return self._msgs
 
-    @require_authenticated
-    def update(self, ttl, headers):
+    def update(self, ttl):
         """
         Updates this claim with the specified TTL
         """
         body = {"ttl": ttl}
-        self._conn._perform_http(
-            href=self._href, method='PATCH', body=body, headers=headers)
+        self._conn._perform_http(href=self._href, method='PATCH', body=body)
 
-    @require_authenticated
-    def release(self, headers):
+    def release(self):
         """
         Releases the current claim
         """
-        self._conn._perform_http(
-            href=self._href, method='DELETE', headers=headers)
+        self._conn._perform_http(href=self._href, method='DELETE')
