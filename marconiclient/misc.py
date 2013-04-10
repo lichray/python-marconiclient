@@ -1,6 +1,7 @@
 
 from urllib import quote
 
+
 def proc_template(template, **kwargs):
     """
     Processes a templated URL by substituting the

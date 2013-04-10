@@ -12,6 +12,7 @@ from exceptions import ClientException
 from urlparse import urljoin
 import requests
 
+
 class Connection(object):
     def __init__(self, client_id, auth_endpoint, user, key, **kwargs):
         """
@@ -59,10 +60,11 @@ class Connection(object):
         if token:
             self.auth_token = token
         else:
-            (self._endpoint, self.auth_token) = authenticate(self._auth_endpoint,
-                                                         self._user, self._key,
-                                                         endpoint=self._endpoint,
-                                                         cacert=self._cacert)
+            (self._endpoint,
+             self.auth_token) = authenticate(self._auth_endpoint,
+                                             self._user, self._key,
+                                             endpoint=self._endpoint,
+                                             cacert=self._cacert)
         self._load_homedoc_hrefs()
 
     @property
@@ -161,7 +163,6 @@ class Connection(object):
         href = proc_template(self.queue_href, queue_name=queue_name)
         self._perform_http(href=href, method='DELETE')
 
-
     def get_queue_metadata(self, queue_name):
         href = proc_template(self._queue_href, queue_name=queue_name)
 
@@ -169,7 +170,6 @@ class Connection(object):
             return self._perform_http(conn, href, 'GET')
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
-
 
     def _perform_http(self, method, href, request_body='', headers={}):
         """

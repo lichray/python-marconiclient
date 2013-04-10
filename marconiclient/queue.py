@@ -43,7 +43,6 @@ class Queue(object):
                                  method='PUT',
                                  request_body=metadata)
 
-
         self._metadata = metadata
 
     @property
