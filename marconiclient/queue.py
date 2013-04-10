@@ -24,6 +24,8 @@ class Queue(object):
         self._name = name
         self._metadata = metadata
 
+        self._get_messages_href = None
+
         self._messages_template = href + "/messages"
         self._message_template = href + "/messages/{message_id}"
         self._claims_template = href + "/claims?limit={limit}"
@@ -35,8 +37,10 @@ class Queue(object):
 
     @require_authenticated
     def update_metadata(self, metadata, headers):
-        self._conn._perform_http(
-            href=self._href, method='PUT', request_body=metadata, headers=headers)
+        self._conn._perform_http(href=self._href,
+                                 method='PUT',
+                                 request_body=metadata,
+                                 headers=headers)
 
         self._metadata = metadata
 
@@ -80,13 +84,16 @@ class Queue(object):
         return Claim(conn=self._conn, messages=msgs, href=location)
 
     @require_authenticated
-    def get_messages(self, headers, echo=False):
+    def get_messages(self, headers, echo=False, restart=False):
         """
+        TODO(jdp): Comment me
         """
-        href = proc_template(self._conn.messages_href, queue_name=self.name)
+        if not self._get_messages_href or restart:
+            self._get_messages_href = proc_template(self._conn.messages_href,
+                                                    queue_name=self.name)
 
-        if echo:
-            href += "?echo=true"
+            if echo:
+                self._get_messages_href += "?echo=true"
 
         truncated = True  # Was the current request truncated?
 
@@ -94,7 +101,7 @@ class Queue(object):
             truncated = False
 
             hdrs, body = self._conn._perform_http(
-                href=href, method='GET', headers=headers)
+                href=self._get_messages_href, method='GET', headers=headers)
 
             if not body:
                 # Empty body, just short-circuit and return
@@ -102,11 +109,13 @@ class Queue(object):
 
             for link in body['links']:
                 if link['rel'] == 'next':
-                    href = link['href']
+                    self._get_messages_href = link['href']
                     truncated = True
 
             for message in body['messages']:
-                yield Message(self._conn, href='blah', content=message)
+                yield Message(self._conn,
+                              href=message['href'],
+                              content=message)
 
     @require_authenticated
     def get_stats(self, headers):
