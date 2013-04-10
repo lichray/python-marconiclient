@@ -75,9 +75,6 @@ class Connection(object):
         self._token = value
         self._session.headers['X-Auth-Token'] = value
 
-    def _set_auth_token(token):
-        self._session.headers['X-Auth-Token'] = token
-
     def _load_homedoc_hrefs(self):
         """
         Loads the home document hrefs for each endpoint
