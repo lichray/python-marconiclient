@@ -19,6 +19,14 @@ class Claim(object):
         """
         return self._msgs
 
+    def read(self):
+        """
+        Gets the claim metadata and the associated messages.
+        """
+        hdrs, body = self._conn._perform_http(href=self._href, method='GET')
+
+        return body
+
     def update(self, ttl):
         """
         Updates this claim with the specified TTL
