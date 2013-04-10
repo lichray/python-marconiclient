@@ -7,7 +7,6 @@ import json
 from functools import wraps
 from auth import authenticate
 from misc import proc_template, require_authenticated
-from misc import require_clientid
 from queue import Queue
 from exceptions import ClientException
 from urlparse import urljoin
@@ -57,7 +56,8 @@ class Connection(object):
         """
         Authenticates the client and returns the endpoint
         """
-        self._session = requests.Session(verify=True)
+        headers = {"Client-Id": self._client_id}
+        self._session = requests.Session(verify=True, headers=headers)
 
         if not self._token:
             (self._endpoint, self._token) = authenticate(self._auth_endpoint,
@@ -99,7 +99,6 @@ class Connection(object):
         # Specific action endpoint
         self.action_href = self.actions_href + "/{action_id}"
 
-    @require_clientid
     @require_authenticated
     def create_queue(self, queue_name, ttl, headers, **kwargs):
         """
@@ -116,7 +115,6 @@ class Connection(object):
 
         return Queue(self, href=href, name=queue_name, metadata=body)
 
-    @require_clientid
     @require_authenticated
     def get_queue(self, queue_name, headers):
         """
@@ -135,7 +133,6 @@ class Connection(object):
 
         return Queue(self, href=href, name=queue_name, metadata=body)
 
-    @require_clientid
     @require_authenticated
     def get_queues(self, headers):
         href = self.queues_href
@@ -148,7 +145,6 @@ class Connection(object):
             yield Queue(conn=self._conn, name=queue['name'],
                         href=queue['href'], metadata=queue['metadata'])
 
-    @require_clientid
     @require_authenticated
     def delete_queue(self, queue_name, headers):
         """
@@ -165,7 +161,6 @@ class Connection(object):
         except ClientException as ex:
             raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
-    @require_clientid
     @require_authenticated
     def get_queue_metadata(self, queue_name, headers, **kwargs):
         href = proc_template(self._queue_href, queue_name=queue_name)

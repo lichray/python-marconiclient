@@ -1,5 +1,5 @@
 
-from misc import require_authenticated, require_clientid
+from misc import require_authenticated
 
 
 class Claim(object):
@@ -23,7 +23,6 @@ class Claim(object):
         return self._msgs
 
     @require_authenticated
-    @require_clientid
     def update(self, ttl, headers):
         """
         Updates this claim with the specified TTL
@@ -33,7 +32,6 @@ class Claim(object):
             href=self._href, method='PATCH', body=body, headers=headers)
 
     @require_authenticated
-    @require_clientid
     def release(self, headers):
         """
         Releases the current claim

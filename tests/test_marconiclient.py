@@ -60,7 +60,7 @@ class TestClientException(testtools.TestCase):
             conn.delete_queue(queue_name)
             return queue_name
 
-        pool = GreenPool(300)
+        pool = GreenPool(200)
 
         def on_message_posted(greenthread):
             msg = greenthread.wait()

@@ -36,20 +36,3 @@ def require_authenticated(f):
 
         return f(self, *args, **kwargs)
     return wrapper
-
-
-def require_clientid(f):
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        client_id = self._conn._client_id
-
-        if not client_id:
-            raise ClientException("Client ID Requied")
-
-        hdrs = kwargs.get('headers', {})
-        hdrs['Client-Id'] = client_id
-
-        kwargs['headers'] = hdrs
-
-        return f(self, *args, **kwargs)
-    return wrapper

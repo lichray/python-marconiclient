@@ -1,5 +1,4 @@
 from misc import proc_template, require_authenticated
-from misc import require_clientid
 
 from message import Message
 from claim import Claim
@@ -34,7 +33,6 @@ class Queue(object):
         return self._metadata
 
     @require_authenticated
-    @require_clientid
     def update_metadata(self, metadata, headers):
         self._conn._perform_http(
             href=self._href, method='PUT', request_body=metadata, headers=headers)
@@ -46,7 +44,6 @@ class Queue(object):
         return self._href
 
     @require_authenticated
-    @require_clientid
     def post_message(self, message, ttl, headers, **kwargs):
         """
         Posts a single message with the specified ttl
@@ -64,7 +61,6 @@ class Queue(object):
         return Message(conn=self._conn, href=location)
 
     @require_authenticated
-    @require_clientid
     def claim(self, headers, ttl, grace, limit=5):
         """
         Claims a set of messages. The server configuration determines
@@ -83,7 +79,6 @@ class Queue(object):
         return Claim(conn=self._conn, messages=msgs, href=location)
 
     @require_authenticated
-    @require_clientid
     def get_messages(self, headers, echo=False):
         """
         """
