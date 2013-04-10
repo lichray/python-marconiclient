@@ -1,8 +1,5 @@
 
 
-from misc import proc_template
-
-
 class NoSuchMessageError(Exception):
     def __init__(self, name):
         pass
