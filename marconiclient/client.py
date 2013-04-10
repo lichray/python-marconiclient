@@ -164,7 +164,11 @@ class Connection(object):
 
     def get_queue_metadata(self, queue_name):
         href = proc_template(self._queue_href, queue_name=queue_name)
-        return self._perform_http(conn, href, 'GET')
+
+        try:
+            return self._perform_http(conn, href, 'GET')
+        except ClientException as ex:
+            raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
 
 
     def _perform_http(self, method, href, request_body='', headers={}):
