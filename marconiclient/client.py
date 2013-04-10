@@ -7,7 +7,7 @@ import json
 from functools import wraps
 from auth import authenticate
 from misc import proc_template
-from queue import Queue
+from queue import Queue, NoSuchQueueError
 from exceptions import ClientException
 from urlparse import urljoin
 import requests
