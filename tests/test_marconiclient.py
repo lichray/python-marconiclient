@@ -21,7 +21,6 @@ import uuid
 from urlparse import urlparse
 
 
-
 class TestClientException(testtools.TestCase):
 
     def test_exception(self):
@@ -30,23 +29,23 @@ class TestClientException(testtools.TestCase):
         ex = ClientException("Something bad happened")
         self.assertTrue(isinstance(ex, Exception))
 
-
     #TODO Use dependency injection to mock HTTP(S)Client
     def test_connection(self):
 
         """
-        conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
-                          client_id=str(uuid.uuid4()),
-                          endpoint="http://localhost:8888/v1/12345",
-                          user="", key="")
+        conn = Connection(
+            auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
+            client_id=str(uuid.uuid4()),
+            endpoint="http://localhost:8888/v1/12345",
+            user="", key="")
 
         """
 
-        conn = Connection(auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
-                          client_id=str(uuid.uuid4()),
-                          endpoint="http://166.78.143.130/v1/12345",
-                          user="", key="")
-
+        conn = Connection(
+            auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
+            client_id=str(uuid.uuid4()),
+            endpoint="http://166.78.143.130/v1/12345",
+            user="", key="")
 
         conn.connect(token='blah')
 
@@ -74,7 +73,7 @@ class TestClientException(testtools.TestCase):
                 gt = pool.spawn(post_worker, queue)
                 gt.link(on_message_posted)
 
-        queue_names = ["queue-"+str(x) for x in xrange(0,5)]
+        queue_names = ["queue-" + str(x) for x in xrange(0, 5)]
 
         for queue_name in queue_names:
             gt = pool.spawn(create_worker, queue_name)

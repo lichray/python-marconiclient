@@ -32,7 +32,9 @@ class Message(object):
         return self._href
 
     def read(self):
-        """ Gets this message and returns the content, includinig all metadata """
+        """
+        Gets this message and returns the content, includinig all metadata
+        """
         hdrs, body = self._conn._perform_http(href=self._href, method='GET')
 
         return body
