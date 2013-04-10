@@ -60,7 +60,8 @@ class TestClientException(testtools.TestCase):
             conn.delete_queue(queue_name)
             return queue_name
 
-        pool = GreenPool(200)
+        pool = GreenPool(100)
+
 
         def on_message_posted(greenthread):
             msg = greenthread.wait()
@@ -70,9 +71,12 @@ class TestClientException(testtools.TestCase):
             queue = greenthread.wait()
             print queue.name
 
+            """
+
             for x in range(0, 1000):
                 gt = pool.spawn(post_worker, queue)
                 gt.link(on_message_posted)
+            """
 
         queue_names = ["queue-"+str(x) for x in xrange(0,50000)]
 

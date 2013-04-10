@@ -52,7 +52,10 @@ class Connection(object):
         not happen.
         """
         headers = {"Client-Id": self._client_id}
-        self._session = requests.Session(verify=True, headers=headers)
+        self._session = requests.Session()
+
+        self._session.headers.update(headers)
+        self._session.verify = True
 
         if token:
             self.auth_token = token
@@ -84,7 +87,7 @@ class Connection(object):
         actually parse the home document.
         """
 
-        # Queues endpoint
+        # Queues endpoint{" + name + "}", quote(str(value)))
         self.queues_href = self._endpoint + "/queues"
 
         # Specific queue endpoint
