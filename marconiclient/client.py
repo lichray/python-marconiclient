@@ -190,7 +190,7 @@ class Connection(object):
         :return: (headers, body)
         """
         if not isinstance(request_body, str):
-            request_body = json.dumps(request_body)
+            request_body = json.dumps(request_body, ensure_ascii=False)
 
         url = urlparse.urljoin(self._endpoint, href)
 
@@ -207,6 +207,6 @@ class Connection(object):
                                       http_status=response.status_code,
                                       http_response_content=response.content)
 
-        resp_body = json.loads(response.content) if response.content else ''
+        resp_body = response.content and json.loads(response.content)
 
         return response.headers, resp_body
