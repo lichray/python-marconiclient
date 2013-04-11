@@ -7,7 +7,7 @@ import json
 from functools import wraps
 from auth import authenticate
 from misc import proc_template
-from queue import Queue
+from resources import Queue
 from marconiclient import exceptions as exc
 from urlparse import urljoin
 import requests
