@@ -85,6 +85,10 @@ class Queue(object):
 
         return Claim(conn=self._conn, messages=msgs, href=location)
 
+    def get_message(self, message_id):
+
+        href = proc_template(self._conn.message_href, message_id)
+
     def get_messages(self, echo=False, restart=False):
         """
         TODO(jdp): Comment me

@@ -35,7 +35,7 @@ setuptools.setup(
     author='OpenStack, LLC.',
     author_email='openstack-admins@lists.launchpad.net',
     packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
-    install_requires=['gevent', 'requests'],
+    install_requires=['eventlet', 'requests'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -46,8 +46,5 @@ setuptools.setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Environment :: No Input/Output (Daemon)',
-    ],
-    scripts=[
-        'bin/marconi',
     ],
 )
