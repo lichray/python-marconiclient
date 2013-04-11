@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import testtools
-import marconiclient
-from eventlet import GreenPool
 import uuid
-from urlparse import urlparse
+
+import eventlet
+
+import marconiclient
 
 
 class TestClientException(testtools.TestCase):
@@ -59,7 +59,7 @@ class TestClientException(testtools.TestCase):
             conn.delete_queue(queue_name)
             return queue_name
 
-        pool = GreenPool(100)
+        pool = eventlet.GreenPool(100)
 
         def on_message_posted(greenthread):
             msg = greenthread.wait()

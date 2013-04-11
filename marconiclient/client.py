@@ -1,16 +1,18 @@
 
-from eventlet.green.urllib import quote
-import eventlet
-eventlet.monkey_patch(socket=True, select=True)
+try:
+    import simplejson as json
+except ImportError:
+    import json
+import urlparse
 
-import json
-from functools import wraps
-from auth import authenticate
-from misc import proc_template
-from resources import Queue
-from marconiclient import exceptions as exc
-from urlparse import urljoin
+import eventlet
 import requests
+
+from marconiclient import auth
+from marconiclient import misc
+from marconiclient import resources
+
+eventlet.monkey_patch(socket=True, select=True)
 
 
 class Connection(object):
@@ -61,10 +63,11 @@ class Connection(object):
             self.auth_token = token
         else:
             (self._endpoint,
-             self.auth_token) = authenticate(self._auth_endpoint,
-                                             self._user, self._key,
-                                             endpoint=self._endpoint,
-                                             cacert=self._cacert)
+             self.auth_token) = auth.authenticate(
+                 self._auth_endpoint,
+                 self._user, self._key,
+                 endpoint=self._endpoint,
+                 cacert=self._cacert)
         self._load_homedoc_hrefs()
 
     @property
@@ -122,12 +125,12 @@ class Connection(object):
         :param queue_name: The name of the queue
         :param ttl: The default time-to-live for messages in this queue
         """
-        href = proc_template(self.queue_href, queue_name=queue_name)
+        href = misc.proc_template(self.queue_href, queue_name=queue_name)
         body = {}
 
         self._perform_http(href=href, method='PUT', request_body=body)
 
-        return Queue(self, href=href, name=queue_name, metadata=body)
+        return resources.Queue(self, href=href, name=queue_name, metadata=body)
 
     def get_queue(self, queue_name):
         """
@@ -135,7 +138,7 @@ class Connection(object):
 
         :param queue_name: The name of the queue
         """
-        href = proc_template(self.queue_href, queue_name=queue_name)
+        href = misc.proc_template(self.queue_href, queue_name=queue_name)
 
         try:
             hdrs, body = self._perform_http(href=href, method='GET')
@@ -143,7 +146,7 @@ class Connection(object):
             raise exc.NoSuchQueueError(queue_name) if \
                 ex.http_status == 404 else ex
 
-        return Queue(self, href=href, name=queue_name, metadata=body)
+        return resources.Queue(self, href=href, name=queue_name, metadata=body)
 
     def get_queues(self):
         href = self.queues_href
@@ -152,8 +155,10 @@ class Connection(object):
         queues = res["queues"]
 
         for queue in queues:
-            yield Queue(conn=self._conn, name=queue['name'],
-                        href=queue['href'], metadata=queue['metadata'])
+            yield resources.Queue(conn=self._conn,
+                                  name=queue['name'],
+                                  href=queue['href'],
+                                  metadata=queue['metadata'])
 
     def delete_queue(self, queue_name):
         """
@@ -161,11 +166,11 @@ class Connection(object):
 
         :param queue_name: The name of the queue
         """
-        href = proc_template(self.queue_href, queue_name=queue_name)
+        href = misc.proc_template(self.queue_href, queue_name=queue_name)
         self._perform_http(href=href, method='DELETE')
 
     def get_queue_metadata(self, queue_name):
-        href = proc_template(self._queue_href, queue_name=queue_name)
+        href = misc.proc_template(self._queue_href, queue_name=queue_name)
 
         try:
             return self._perform_http(conn, href, 'GET')
@@ -187,7 +192,7 @@ class Connection(object):
         if not isinstance(request_body, str):
             request_body = json.dumps(request_body)
 
-        url = urljoin(self._endpoint, href)
+        url = urlparse.urljoin(self._endpoint, href)
 
         response = requests.request(method=method, url=url,
                 data=request_body, headers={"Client-Id": self._client_id})

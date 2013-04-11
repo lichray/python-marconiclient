@@ -1,5 +1,4 @@
 
-
 class ClientException(Exception):
     """Exception for wrapping up Marconi client errors"""
     def __init__(self, href='', http_status=0,

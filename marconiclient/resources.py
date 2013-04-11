@@ -1,5 +1,5 @@
 
-from misc import proc_template
+from marconiclient import misc
 
 
 class Queue(object):
@@ -43,7 +43,8 @@ class Queue(object):
         Posts a single message with the specified ttl
         :param ttl: The TTL to set on this message
         """
-        href = proc_template(self._conn.messages_href, queue_name=self.name)
+        href = misc.proc_template(self._conn.messages_href,
+                                  queue_name=self.name)
 
         body = [{"ttl": ttl, "body": message}]
 
@@ -59,7 +60,7 @@ class Queue(object):
         Claims a set of messages. The server configuration determines
         the maximum number of messages that can be claimed.
         """
-        href = proc_template(self._claims_template, limit=str(limit))
+        href = misc.proc_template(self._claims_template, limit=str(limit))
 
         body = {"ttl": ttl, "grace": grace}
 
@@ -83,8 +84,9 @@ class Queue(object):
         TODO(jdp): Comment me
         """
         if not self._get_messages_href or restart:
-            self._get_messages_href = proc_template(self._conn.messages_href,
-                                                    queue_name=self.name)
+            self._get_messages_href = misc.proc_template(
+                self._conn.messages_href,
+                queue_name=self.name)
 
             if echo:
                 self._get_messages_href += "?echo=true"
@@ -113,7 +115,7 @@ class Queue(object):
 
     def get_stats(self):
         """Retrieves statistics about the queue"""
-        href = proc_template(self._conn.stats_href, queue_name=self._name)
+        href = misc.proc_template(self._conn.stats_href, queue_name=self._name)
 
         hdrs, body = self._conn._perform_http(href=href, method='GET')
 

@@ -1,4 +1,4 @@
 """Marconi Client Library Binding"""
 
-from client import Connection
-import exceptions
+from marconiclient.client import Connection
+from marconiclient import exceptions

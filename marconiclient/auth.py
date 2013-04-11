@@ -1,8 +1,8 @@
 
-from exceptions import ClientException
-
-from keystoneclient.v2_0 import client as ksclient
 from keystoneclient import exceptions
+from keystoneclient.v2_0 import client as ksclient
+
+from marconiclient import exceptions as exc
 
 
 def authenticate(auth_url, user, key, **kwargs):
@@ -46,11 +46,11 @@ def authenticate(auth_url, user, key, **kwargs):
                                     insecure=insecure)
 
     except exceptions.Unauthorized as ex:
-        raise ClientException('Unauthorized. Check username, password'
-                              ' and tenant name/id')
+        raise exc.ClientException('Unauthorized. Check username, password'
+                                  ' and tenant name/id')
 
     except exceptions.AuthorizationFailure as err:
-        raise ClientException('Authorization Failure. %s' % err)
+        raise exc.ClientException('Authorization Failure. %s' % err)
 
     if not endpoint:
         # The user did not pass in an endpoint, so we need to
@@ -68,6 +68,6 @@ def authenticate(auth_url, user, key, **kwargs):
                 service_type=service_type,
                 endpoint_type=endpoint_type)
         except exceptions.EndpointNotFound as ex:
-            raise ClientException('Endpoint not found in service catalog')
+            raise exc.ClientException('Endpoint not found in service catalog')
 
     return (endpoint, _ksclient.auth_token)
