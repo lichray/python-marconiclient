@@ -15,7 +15,7 @@
 
 
 import testtools
-from marconiclient import *
+import marconiclient
 from eventlet import GreenPool
 import uuid
 from urlparse import urlparse
@@ -26,14 +26,14 @@ class TestClientException(testtools.TestCase):
     def test_exception(self):
         # Basic instantiation and inheritance check
 
-        ex = ClientException("Something bad happened")
+        ex = marconiclient.exceptions.ClientException("Something bad happened")
         self.assertTrue(isinstance(ex, Exception))
 
     #TODO Use dependency injection to mock HTTP(S)Client
     def test_connection(self):
 
         """
-        conn = Connection(
+        conn = marconiclient.Connection(
             auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
             client_id=str(uuid.uuid4()),
             endpoint="http://localhost:8888/v1/12345",
@@ -41,7 +41,7 @@ class TestClientException(testtools.TestCase):
 
         """
 
-        conn = Connection(
+        conn = marconiclient.Connection(
             auth_endpoint="https://identity.api.rackspacecloud.com/v2.0",
             client_id=str(uuid.uuid4()),
             endpoint="http://166.78.143.130/v1/12345",
