@@ -1,5 +1,5 @@
+
 from misc import proc_template
-from stats import Stats
 
 
 class Queue(object):
@@ -117,7 +117,7 @@ class Queue(object):
 
         hdrs, body = self._conn._perform_http(href=href, method='GET')
 
-        return Stats(body)
+        return body
 
     @property
     def name(self):
