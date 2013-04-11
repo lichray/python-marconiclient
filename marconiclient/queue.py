@@ -5,14 +5,6 @@ from claim import Claim
 from stats import Stats
 
 
-class NoSuchQueueError(Exception):
-    def __init__(self, name):
-        self._queue_name = name
-
-    def __str__(self):
-        return "Queue '%s' not found" % (self._queue_name)
-
-
 class Queue(object):
 
     def __init__(self, conn, name, href, metadata=None):

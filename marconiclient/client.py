@@ -7,8 +7,8 @@ import json
 from functools import wraps
 from auth import authenticate
 from misc import proc_template
-from queue import Queue, NoSuchQueueError
-from exceptions import ClientException
+from queue import Queue
+from marconiclient import exceptions as exc
 from urlparse import urljoin
 import requests
 
@@ -139,8 +139,9 @@ class Connection(object):
 
         try:
             hdrs, body = self._perform_http(href=href, method='GET')
-        except ClientException as ex:
-            raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
+        except exc.ClientException as ex:
+            raise exc.NoSuchQueueError(queue_name) if \
+                ex.http_status == 404 else ex
 
         return Queue(self, href=href, name=queue_name, metadata=body)
 
@@ -168,8 +169,9 @@ class Connection(object):
 
         try:
             return self._perform_http(conn, href, 'GET')
-        except ClientException as ex:
-            raise NoSuchQueueError(queue_name) if ex.http_status == 404 else ex
+        except exc.ClientException as ex:
+            raise exc.NoSuchQueueError(queue_name) if \
+                ex.http_status == 404 else ex
 
     def _perform_http(self, method, href, request_body='', headers={}):
         """
@@ -195,10 +197,10 @@ class Connection(object):
 
         # Check if the status code is 2xx class
         if not response.ok:
-            raise ClientException(href=href,
-                                  method=method,
-                                  http_status=response.status_code,
-                                  http_response_content=response.content)
+            raise exc.ClientException(href=href,
+                                      method=method,
+                                      http_status=response.status_code,
+                                      http_response_content=response.content)
 
         resp_body = json.loads(response.content) if response.content else ''
 

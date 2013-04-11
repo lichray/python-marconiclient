@@ -1,10 +1,5 @@
 
 
-class NoSuchMessageError(Exception):
-    def __init__(self, name):
-        pass
-
-
 class Message(object):
 
     def __init__(self, conn, href, content=None):

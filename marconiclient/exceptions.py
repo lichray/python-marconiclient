@@ -12,3 +12,16 @@ class ClientException(Exception):
 
         msg = "%s %s returned %d" % (self.method, self.href, self.http_status)
         Exception.__init__(self, msg)
+
+
+class NoSuchQueueError(Exception):
+    def __init__(self, name):
+        self._queue_name = name
+
+    def __str__(self):
+        return "Queue '%s' not found" % (self._queue_name)
+
+
+class NoSuchMessageError(Exception):
+    def __init__(self, name):
+        pass
