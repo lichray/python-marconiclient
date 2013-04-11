@@ -115,7 +115,7 @@ class Connection(object):
         # Statistics endpoint
         self.stats_href = self.queue_href + "/stats"
 
-    def create_queue(self, queue_name, ttl):
+    def create_queue(self, queue_name):
         """
         Creates a queue with the specified name
 
@@ -123,7 +123,7 @@ class Connection(object):
         :param ttl: The default time-to-live for messages in this queue
         """
         href = proc_template(self.queue_href, queue_name=queue_name)
-        body = {u'messages': {u'ttl': ttl}}
+        body = {}
 
         self._perform_http(href=href, method='PUT', request_body=body)
 

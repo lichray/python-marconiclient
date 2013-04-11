@@ -50,7 +50,7 @@ class TestClientException(testtools.TestCase):
         conn.connect(token='blah')
 
         def create_worker(queue_name):
-            return conn.create_queue(queue_name, 100)
+            return conn.create_queue(queue_name)
 
         def post_worker(queue):
             return queue.post_message('test_message', 10)

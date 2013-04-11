@@ -1,7 +1,11 @@
-dist/
-.tox
+*~
+*.pyc
 *.egg-info
-*.py[co]
-.DS_Store
-*.log
+dist/
+build
+.coverage
+.tox
+cover
 .venv
+.*.swp
+.DS_Store
