@@ -70,7 +70,7 @@ class Queue(object):
         Claims a set of messages. The server configuration determines
         the maximum number of messages that can be claimed.
         """
-        href = proc_template(self._claims_template, limit=limit)
+        href = proc_template(self._claims_template, limit=str(limit))
 
         body = {"ttl": ttl, "grace": grace}
 

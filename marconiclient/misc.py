@@ -1,5 +1,5 @@
 
-from urllib import quote
+import urllib
 
 
 def proc_template(template, **kwargs):
@@ -7,9 +7,5 @@ def proc_template(template, **kwargs):
     Processes a templated URL by substituting the
     dictionary args and returning the strings.
     """
-    res = template
-
-    for name, value in kwargs.iteritems():
-        res = res.replace("{" + name + "}", quote(str(value)))
-
-    return res
+    return template.format(**dict([(k, urllib.quote(v))
+                           for k, v in kwargs.items()]))
