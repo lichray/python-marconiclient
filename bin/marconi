@@ -1,6 +1,0 @@
-#!/usr/bin/python -u
-
-from optparse import OptionParser
-
-if __name__ == '__main__':
-    print "Not implemented"

@@ -47,7 +47,4 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
         'Environment :: No Input/Output (Daemon)',
     ],
-    scripts=[
-        'bin/marconi',
-    ],
 )
