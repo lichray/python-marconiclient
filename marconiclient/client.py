@@ -128,7 +128,7 @@ class Connection(object):
         href = misc.proc_template(self.queue_href, queue_name=queue_name)
         body = {}
 
-        self._perform_http(href=href, method='PUT', request_body=body)
+        self._perform_http(href=href, method='PUT', request_obj=body)
 
         return resources.Queue(self, href=href, name=queue_name, metadata=body)
 
@@ -178,27 +178,26 @@ class Connection(object):
             raise exc.NoSuchQueueError(queue_name) if \
                 ex.http_status == 404 else ex
 
-    def _perform_http(self, method, href, request_body='', headers={}):
+    def _perform_http(self, method, href, request_obj=None, headers={}):
         """
         Perform an HTTP operation, checking for appropriate
         errors, etc. and returns the response
 
         :param conn: The HTTPConnection or HTTPSConnection to use
         :param method: The http method to use (GET, PUT, etc)
-        :param body: The optional body to submit
+        :param request_obj: The optional JSON-serializable object to submit
         :param headers: Any additional headers to submit
         :return: (headers, body)
         """
-        if not isinstance(request_body, str):
-            request_body = json.dumps(request_body, ensure_ascii=False)
+        request_body = json.dumps(request_obj, ensure_ascii=False) if \
+            request_obj is not None else ''
 
         url = urlparse.urljoin(self._endpoint, href)
 
-        response = requests.request(method=method, url=url,
-                data=request_body, headers={"Client-Id": self._client_id})
-
-        #response = self._session.request(method=method, url=url,
-        #                                 data=request_body, headers=headers)
+        response = requests.request(method=method,
+                                    url=url,
+                                    data=request_body,
+                                    headers={"Client-Id": self._client_id})
 
         # Check if the status code is 2xx class
         if not response.ok:

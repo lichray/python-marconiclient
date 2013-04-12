@@ -30,7 +30,7 @@ class Queue(object):
     def update_metadata(self, metadata):
         self._conn._perform_http(href=self._href,
                                  method='PUT',
-                                 request_body=metadata)
+                                 request_obj=metadata)
 
         self._metadata = metadata
 
@@ -49,7 +49,7 @@ class Queue(object):
         body = [{"ttl": ttl, "body": message}]
 
         hdrs, body = self._conn._perform_http(
-            href=href, method='POST', request_body=body)
+            href=href, method='POST', request_obj=body)
 
         location = hdrs['location']
 
@@ -65,7 +65,7 @@ class Queue(object):
         body = {"ttl": ttl, "grace": grace}
 
         hdrs, body = self._conn._perform_http(
-            href=href, method='POST', request_body=body)
+            href=href, method='POST', request_obj=body)
 
         # Build a list of Message objects using a list comprehesion
         msgs = [Message(self._conn, href=msg[
@@ -197,7 +197,8 @@ class Claim(object):
         Updates this claim with the specified TTL
         """
         body = {"ttl": ttl}
-        self._conn._perform_http(href=self._href, method='PATCH', body=body)
+        self._conn._perform_http(href=self._href, method='PATCH',
+                                 request_obj=body)
 
     def release(self):
         """
