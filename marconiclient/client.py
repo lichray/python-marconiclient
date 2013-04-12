@@ -187,8 +187,11 @@ class Connection(object):
 
         url = urljoin(self._endpoint, href)
 
-        response = self._session.request(method=method, url=url,
-                                         data=request_body, headers=headers)
+        response = requests.request(method=method, url=url,
+                data=request_body, headers={"Client-Id": self._client_id})
+
+        #response = self._session.request(method=method, url=url,
+        #                                 data=request_body, headers=headers)
 
         # Check if the status code is 2xx class
         if not response.ok:
