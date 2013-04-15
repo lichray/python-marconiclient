@@ -72,14 +72,10 @@ class Connection(object):
 
     @property
     def auth_token(self):
-        try:
-            return self._session.headers['X-Auth-Token']
-        except KeyError:
-            return None
+        return self._session.headers.get('X-Auth-Token')
 
     @auth_token.setter
     def auth_token(self, value):
-        self._token = value
         self._session.headers['X-Auth-Token'] = value
 
     def _load_homedoc_hrefs(self):
